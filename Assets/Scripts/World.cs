@@ -6,7 +6,9 @@ public class World : MonoBehaviour {
 
     public Material TextureAtlas;
     public static int ColumnHeight = 2;
-    public static int ChunkSize = 16;
+    public static int ChunkSize = 8;
+    public static int WorldSize = 2;
+
     public static Dictionary<string, Chunk> Chunks;
 
     public static string BuildChunkName(Vector3 v)
@@ -14,22 +16,28 @@ public class World : MonoBehaviour {
         return (int)v.x + "_" + (int)v.y + "_" + (int)v.z;
     }
 
-    private IEnumerator BuildChunkColumn()
+    private IEnumerator BuildWorld()
     {
-        for (var i = 0; i < ColumnHeight; i++)
+        for(var z = 0; z < WorldSize; z++)
         {
-            var chunkPosition = new Vector3(transform.position.x,
-                                            i * ChunkSize,
-                                            transform.position.z);
+            for(var x = 0; x < WorldSize; x++)
+            {
+                for(var y = 0; y < ColumnHeight; y++)
+                {
+                    var chunkPosition = new Vector3(x * ChunkSize,
+                                                    y * ChunkSize,
+                                                    z * ChunkSize);
 
-            var c = new Chunk(chunkPosition, TextureAtlas);
+                    var c = new Chunk(chunkPosition, TextureAtlas);
 
-            c.ChunkGameObject.transform.parent = transform;
+                    c.ChunkGameObject.transform.parent = transform;
 
-            Chunks.Add(c.ChunkGameObject.name, c);
+                    Chunks.Add(c.ChunkGameObject.name, c);
+                }
+            }
         }
 
-        foreach (var c in Chunks)
+        foreach(var c in Chunks)
         {
             c.Value.DrawChunk();
 
@@ -44,7 +52,7 @@ public class World : MonoBehaviour {
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.identity;
 
-        StartCoroutine(BuildChunkColumn());
+        StartCoroutine(BuildWorld());
 	}
 	
 	// Update is called once per frame
