@@ -4,32 +4,32 @@ using UnityEngine;
 
 public class World : MonoBehaviour {
 
-    public Material textureAtlas;
-    public static int columnHeight = 16;
-    public static int chunkSize = 16;
-    public static Dictionary<string, Chunk> chunks;
+    public Material TextureAtlas;
+    public static int ColumnHeight = 3;
+    public static int ChunkSize = 16;
+    public static Dictionary<string, Chunk> Chunks;
 
     public static string BuildChunkName(Vector3 v)
     {
         return (int)v.x + "_" + (int)v.y + "_" + (int)v.z;
     }
 
-    IEnumerator BuildChunkColumn()
+    private IEnumerator BuildChunkColumn()
     {
-        for (int i = 0; i < columnHeight; i++)
+        for (var i = 0; i < ColumnHeight; i++)
         {
-            Vector3 chunkPosition = new Vector3(this.transform.position.x,
-                                                i * chunkSize,
-                                                this.transform.position.z);
+            var chunkPosition = new Vector3(transform.position.x,
+                                                i * ChunkSize,
+                                                transform.position.z);
 
-            Chunk c = new Chunk(chunkPosition, textureAtlas);
+            var c = new Chunk(chunkPosition, TextureAtlas);
 
-            c.chunk.transform.parent = this.transform;
+            c.ChunkGameObject.transform.parent = transform;
 
-            chunks.Add(c.chunk.name, c);
+            Chunks.Add(c.ChunkGameObject.name, c);
         }
 
-        foreach (KeyValuePair<string, Chunk> c in chunks)
+        foreach (var c in Chunks)
         {
             c.Value.DrawChunk();
 
@@ -38,17 +38,17 @@ public class World : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start ()
+    private void Start ()
     {
-        chunks = new Dictionary<string, Chunk>();
-        this.transform.position = Vector3.zero;
-        this.transform.rotation = Quaternion.identity;
+        Chunks = new Dictionary<string, Chunk>();
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
 
         StartCoroutine(BuildChunkColumn());
 	}
 	
 	// Update is called once per frame
-	void Update ()
+    private void Update ()
     {
 		
 	}

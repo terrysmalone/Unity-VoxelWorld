@@ -1,34 +1,33 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Chunk
 {
-    public Material cubeMaterial;
+    public Material CubeMaterial;
 
-    public Block[,,] chunkData;
+    public Block[,,] ChunkData;
 
-    public GameObject chunk;
+    public GameObject ChunkGameObject;
 
     public Chunk(Vector3 position, Material material)
     {
-        chunk = new GameObject(World.BuildChunkName(position));
+        ChunkGameObject = new GameObject(World.BuildChunkName(position));
 
-        chunk.transform.position = position;
+        ChunkGameObject.transform.position = position;
 
-        cubeMaterial = material;
+        CubeMaterial = material;
 
         BuildChunk();
     }
 
     void BuildChunk()
     {
-        chunkData = new Block[World.chunkSize, World.chunkSize, World.chunkSize];
+        ChunkData = new Block[World.ChunkSize, World.ChunkSize, World.ChunkSize];
 
-        for (int z = 0; z < World.chunkSize; z++)
+        for (int z = 0; z < World.ChunkSize; z++)
         {
-            for (int y = 0; y < World.chunkSize; y++)
+            for (int y = 0; y < World.ChunkSize; y++)
             {
-                for (int x = 0; x < World.chunkSize; x++)
+                for (int x = 0; x < World.ChunkSize; x++)
                 {
                     Vector3 pos = new Vector3(x, y, z);
 
@@ -43,7 +42,7 @@ public class Chunk
                         blockType = Block.BlockType.Air;
                     }
 
-                    chunkData[x, y, z] = new Block(blockType, pos, chunk.gameObject, this);
+                    ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
                 }
             }
         }
@@ -52,13 +51,13 @@ public class Chunk
     public void DrawChunk()
     {
 
-        for (int z = 0; z < World.chunkSize; z++)
+        for (int z = 0; z < World.ChunkSize; z++)
         {
-            for (int y = 0; y < World.chunkSize; y++)
+            for (int y = 0; y < World.ChunkSize; y++)
             {
-                for (int x = 0; x < World.chunkSize; x++)
+                for (int x = 0; x < World.ChunkSize; x++)
                 {
-                    chunkData[x, y, z].Draw();
+                    ChunkData[x, y, z].Draw();
                 }
             }
         }    
@@ -74,7 +73,7 @@ public class Chunk
     void CombineQuads()
     {
         //Combine children meshes
-        MeshFilter[] meshFilters = chunk.GetComponentsInChildren<MeshFilter>();
+        MeshFilter[] meshFilters = ChunkGameObject.GetComponentsInChildren<MeshFilter>();
 
         CombineInstance[] combine = new CombineInstance[meshFilters.Length];
 
@@ -88,7 +87,7 @@ public class Chunk
         }
 
         //Create new mesh on parent object
-        MeshFilter cubeMeshFilter = (MeshFilter)chunk.gameObject.AddComponent(typeof(MeshFilter));
+        MeshFilter cubeMeshFilter = (MeshFilter)ChunkGameObject.gameObject.AddComponent(typeof(MeshFilter));
 
         cubeMeshFilter.mesh = new Mesh();
 
@@ -96,11 +95,11 @@ public class Chunk
         cubeMeshFilter.mesh.CombineMeshes(combine);
 
         //Create mesh renderer for cube
-        MeshRenderer cubeMeshRenderer = chunk.gameObject.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
-        cubeMeshRenderer.material = cubeMaterial;
+        var cubeMeshRenderer = ChunkGameObject.gameObject.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
+        cubeMeshRenderer.material = CubeMaterial;
 
         //Delete all uncombined children
-        foreach (Transform quad in chunk.transform)
+        foreach (Transform quad in ChunkGameObject.transform)
         {
             GameObject.Destroy(quad.gameObject);
         }
