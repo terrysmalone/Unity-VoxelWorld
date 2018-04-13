@@ -23,24 +23,20 @@ public class Chunk
     {
         ChunkData = new Block[World.ChunkSize, World.ChunkSize, World.ChunkSize];
 
-        for (int z = 0; z < World.ChunkSize; z++)
+        for (var z = 0; z < World.ChunkSize; z++)
         {
-            for (int y = 0; y < World.ChunkSize; y++)
+            for (var y = 0; y < World.ChunkSize; y++)
             {
-                for (int x = 0; x < World.ChunkSize; x++)
+                for (var x = 0; x < World.ChunkSize; x++)
                 {
-                    Vector3 pos = new Vector3(x, y, z);
+                    var pos = new Vector3(x, y, z);
 
                     Block.BlockType blockType;
 
-                    if (Random.Range(0, 100) < 50)
-                    {
-                        blockType = Block.BlockType.Grass;
-                    }
-                    else
-                    {
-                        blockType = Block.BlockType.Air;
-                    }
+                    blockType = Random.Range(0, 100) < 50 ? Block.BlockType.Grass
+                                                          : Block.BlockType.Air;
+
+                    //blockType = Block.BlockType.Grass;
 
                     ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
                 }
@@ -51,11 +47,11 @@ public class Chunk
     public void DrawChunk()
     {
 
-        for (int z = 0; z < World.ChunkSize; z++)
+        for (var z = 0; z < World.ChunkSize; z++)
         {
-            for (int y = 0; y < World.ChunkSize; y++)
+            for (var y = 0; y < World.ChunkSize; y++)
             {
-                for (int x = 0; x < World.ChunkSize; x++)
+                for (var x = 0; x < World.ChunkSize; x++)
                 {
                     ChunkData[x, y, z].Draw();
                 }
@@ -73,11 +69,11 @@ public class Chunk
     void CombineQuads()
     {
         //Combine children meshes
-        MeshFilter[] meshFilters = ChunkGameObject.GetComponentsInChildren<MeshFilter>();
+        var meshFilters = ChunkGameObject.GetComponentsInChildren<MeshFilter>();
 
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+        var combine = new CombineInstance[meshFilters.Length];
 
-        int i = 0;
+        var i = 0;
 
         while (i < meshFilters.Length)
         {
@@ -87,7 +83,7 @@ public class Chunk
         }
 
         //Create new mesh on parent object
-        MeshFilter cubeMeshFilter = (MeshFilter)ChunkGameObject.gameObject.AddComponent(typeof(MeshFilter));
+        var cubeMeshFilter = (MeshFilter)ChunkGameObject.gameObject.AddComponent(typeof(MeshFilter));
 
         cubeMeshFilter.mesh = new Mesh();
 

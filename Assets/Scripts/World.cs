@@ -5,7 +5,7 @@ using UnityEngine;
 public class World : MonoBehaviour {
 
     public Material TextureAtlas;
-    public static int ColumnHeight = 3;
+    public static int ColumnHeight = 2;
     public static int ChunkSize = 16;
     public static Dictionary<string, Chunk> Chunks;
 
@@ -19,8 +19,8 @@ public class World : MonoBehaviour {
         for (var i = 0; i < ColumnHeight; i++)
         {
             var chunkPosition = new Vector3(transform.position.x,
-                                                i * ChunkSize,
-                                                transform.position.z);
+                                            i * ChunkSize,
+                                            transform.position.z);
 
             var c = new Chunk(chunkPosition, TextureAtlas);
 

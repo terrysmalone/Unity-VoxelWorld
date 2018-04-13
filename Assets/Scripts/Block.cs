@@ -58,37 +58,49 @@ public class Block {
     public void Draw()
     {
         if (m_BlockType == BlockType.Air) return;
-        
-        if(!HasSolidNeighbour((int)m_Position.x, (int)m_Position.y, (int)m_Position.z+1))
+
+        if(!HasSolidNeighbour((int) m_Position.x, (int) m_Position.y, (int) m_Position.z + 1))
+        {
             CreateQuad(CubeSide.Front);
+        }
 
-        if (!HasSolidNeighbour((int)m_Position.x, (int)m_Position.y, (int)m_Position.z-1))
+        if(!HasSolidNeighbour((int) m_Position.x, (int) m_Position.y, (int) m_Position.z - 1))
+        {
             CreateQuad(CubeSide.Back);
+        }
 
-        if (!HasSolidNeighbour((int)m_Position.x, (int)m_Position.y+1, (int)m_Position.z))
+        if(!HasSolidNeighbour((int) m_Position.x, (int) m_Position.y + 1, (int) m_Position.z))
+        {
             CreateQuad(CubeSide.Top);
+        }
 
-        if (!HasSolidNeighbour((int)m_Position.x, (int)m_Position.y-1, (int)m_Position.z))
+        if(!HasSolidNeighbour((int) m_Position.x, (int) m_Position.y - 1, (int) m_Position.z))
+        {
             CreateQuad(CubeSide.Bottom);
+        }
 
         if (!HasSolidNeighbour((int)m_Position.x-1, (int)m_Position.y, (int)m_Position.z))
+        {
             CreateQuad(CubeSide.Left);
+        }
 
-        if (!HasSolidNeighbour((int)m_Position.x+1, (int)m_Position.y, (int)m_Position.z))
+        if(!HasSolidNeighbour((int) m_Position.x + 1, (int) m_Position.y, (int) m_Position.z))
+        {
             CreateQuad(CubeSide.Right);
+        }
     }
 
     private void CreateQuad(CubeSide side)
     {
-        Mesh mesh = new Mesh
+        var mesh = new Mesh
         {
             name = "ScriptedMesh"
         };
 
-        Vector3[] vertices = new Vector3[4];
-        Vector3[] normals = new Vector3[4];
-        Vector2[] uvs = new Vector2[4];
-        int[] triangles = new int[6];
+        var vertices = new Vector3[4];
+        var normals = new Vector3[4];
+        var uvs = new Vector2[4];
+        var triangles = new int[6];
 
         //Set UV's
         Vector2 uv00;
@@ -99,14 +111,14 @@ public class Block {
         SetUVs(side, out uv00, out uv10, out uv01, out uv11);
 
         //All possible vertices
-        Vector3 p0 = new Vector3(-0.5f, -0.5f, 0.5f);
-        Vector3 p1 = new Vector3(0.5f, -0.5f, 0.5f);
-        Vector3 p2 = new Vector3(0.5f, -0.5f, -0.5f);
-        Vector3 p3 = new Vector3(-0.5f, -0.5f, -0.5f);
-        Vector3 p4 = new Vector3(-0.5f, 0.5f, 0.5f);
-        Vector3 p5 = new Vector3(0.5f, 0.5f, 0.5f);
-        Vector3 p6 = new Vector3(0.5f, 0.5f, -0.5f);
-        Vector3 p7 = new Vector3(-0.5f, 0.5f, -0.5f);
+        var p0 = new Vector3(-0.5f, -0.5f, 0.5f);
+        var p1 = new Vector3(0.5f, -0.5f, 0.5f);
+        var p2 = new Vector3(0.5f, -0.5f, -0.5f);
+        var p3 = new Vector3(-0.5f, -0.5f, -0.5f);
+        var p4 = new Vector3(-0.5f, 0.5f, 0.5f);
+        var p5 = new Vector3(0.5f, 0.5f, 0.5f);
+        var p6 = new Vector3(0.5f, 0.5f, -0.5f);
+        var p7 = new Vector3(-0.5f, 0.5f, -0.5f);
 
         switch (side)
         {
@@ -114,9 +126,9 @@ public class Block {
                 vertices = new[] { p0, p1, p2, p3 };
 
                 normals = new[] { Vector3.down,
-                                          Vector3.down,
-                                          Vector3.down,
-                                          Vector3.down };
+                                  Vector3.down,
+                                  Vector3.down,
+                                  Vector3.down };
 
                 uvs = new[] { uv11, uv01, uv00, uv10 };
 
@@ -128,9 +140,9 @@ public class Block {
                 vertices = new[] { p7, p6, p5, p4 };
 
                 normals = new[] { Vector3.up,
-                                          Vector3.up,
-                                          Vector3.up,
-                                          Vector3.up };
+                                  Vector3.up,
+                                  Vector3.up,
+                                  Vector3.up };
 
                 uvs = new[] { uv11, uv01, uv00, uv10 };
 
@@ -142,9 +154,9 @@ public class Block {
                 vertices = new[] { p7, p4, p0, p3 };
 
                 normals = new[] { Vector3.left,
-                                          Vector3.left,
-                                          Vector3.left,
-                                          Vector3.left };
+                                  Vector3.left,
+                                  Vector3.left,
+                                  Vector3.left };
 
                 uvs = new[] { uv11, uv01, uv00, uv10 };
 
@@ -156,9 +168,9 @@ public class Block {
                 vertices = new[] { p5, p6, p2, p1 };
 
                 normals = new[] { Vector3.right,
-                                          Vector3.right,
-                                          Vector3.right,
-                                          Vector3.right };
+                                  Vector3.right,
+                                  Vector3.right,
+                                  Vector3.right };
 
                 uvs = new[] { uv11, uv01, uv00, uv10 };
 
@@ -170,9 +182,9 @@ public class Block {
                 vertices = new[] { p4, p5, p1, p0 };
 
                 normals = new[] { Vector3.forward,
-                                          Vector3.forward,
-                                          Vector3.forward,
-                                          Vector3.forward };
+                                  Vector3.forward,
+                                  Vector3.forward,
+                                  Vector3.forward };
 
                 uvs = new[] { uv11, uv01, uv00, uv10 };
 
@@ -184,9 +196,9 @@ public class Block {
                 vertices = new[] { p6, p7, p3, p2 };
 
                 normals = new[] { Vector3.back,
-                                          Vector3.back,
-                                          Vector3.back,
-                                          Vector3.back };
+                                  Vector3.back,
+                                  Vector3.back,
+                                  Vector3.back };
 
                 uvs = new[] { uv11, uv01, uv00, uv10 };
 
@@ -203,11 +215,11 @@ public class Block {
 
         mesh.RecalculateBounds();
 
-        GameObject quad = new GameObject("Quad");
+        var quad = new GameObject("Quad");
         quad.transform.position = m_Position;
         quad.transform.parent = m_Parent.transform;
 
-        MeshFilter meshFilter = (MeshFilter)quad.AddComponent(typeof(MeshFilter));
+        var meshFilter = (MeshFilter)quad.AddComponent(typeof(MeshFilter));
         meshFilter.mesh = mesh;
 
         //MeshRenderer renderer = quad.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
@@ -248,8 +260,52 @@ public class Block {
 
     public bool HasSolidNeighbour(int x, int y, int z)
     {
-        var chunks = m_Owner.ChunkData;
+        Block[,,] chunks;
+        
+        if (x < 0 || x >= World.ChunkSize 
+           || y < 0 || y >= World.ChunkSize 
+           || z < 0 || z >= World.ChunkSize)
+        {
+            //Neighbour is in neighbouring chunk
+            
+            var neighbouringChunkPos = m_Parent.transform.position +
+                                       new Vector3((x - (int) m_Position.x) * World.ChunkSize,
+                                                   (y - (int) m_Position.y) * World.ChunkSize,
+                                                   (z - (int) m_Position.z) * World.ChunkSize);
 
+            Debug.Log("NeighbourPos:" + x + ","
+                                             + y + ","
+                                             + z + ",");
+
+            var name = World.BuildChunkName(neighbouringChunkPos);
+
+            Debug.Log("neighbouringChunkPos:" + name);
+
+            x = ConvertBlockIndexToLocal(x);
+            y = ConvertBlockIndexToLocal(y);
+            z = ConvertBlockIndexToLocal(z);
+
+            Debug.Log("NeighbourPos Local:" + x + ","
+                                             + y + ","
+                                             + z + ",");
+
+            Chunk chunk;
+
+            if(World.Chunks.TryGetValue(name, out chunk))
+            {
+                chunks = chunk.ChunkData;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else 
+        {
+            //Neighbour is in this chunk
+            chunks = m_Owner.ChunkData;
+        }
+        
         try
         {
             return chunks[x, y, z].IsSolid;
@@ -257,6 +313,20 @@ public class Block {
         catch (System.IndexOutOfRangeException) { }
 
         return false;
+    }
+
+    private static int ConvertBlockIndexToLocal(int index)
+    {
+        if(index == -1)
+        {
+            return World.ChunkSize - 1;
+        }
+        else if(index == World.ChunkSize)
+        {
+            return 0;
+        }
+
+        return index;
     }
 }
 
