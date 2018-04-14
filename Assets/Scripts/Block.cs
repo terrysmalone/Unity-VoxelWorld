@@ -273,21 +273,11 @@ public class Block {
                                                    (y - (int) m_Position.y) * World.ChunkSize,
                                                    (z - (int) m_Position.z) * World.ChunkSize);
 
-            Debug.Log("NeighbourPos:" + x + ","
-                                             + y + ","
-                                             + z + ",");
-
             var name = World.BuildChunkName(neighbouringChunkPos);
-
-            Debug.Log("neighbouringChunkPos:" + name);
 
             x = ConvertBlockIndexToLocal(x);
             y = ConvertBlockIndexToLocal(y);
             z = ConvertBlockIndexToLocal(z);
-
-            Debug.Log("NeighbourPos Local:" + x + ","
-                                             + y + ","
-                                             + z + ",");
 
             Chunk chunk;
 
@@ -328,11 +318,4 @@ public class Block {
 
         return index;
     }
-}
-
-internal struct OffsetPoint
-{
-    public Block.BlockType BlockType;
-
-    public int X, Y;
 }

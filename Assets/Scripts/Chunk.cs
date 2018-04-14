@@ -19,7 +19,7 @@ public class Chunk
         BuildChunk();
     }
 
-    void BuildChunk()
+    private void BuildChunk()
     {
         ChunkData = new Block[World.ChunkSize, World.ChunkSize, World.ChunkSize];
 
@@ -31,12 +31,32 @@ public class Chunk
                 {
                     var pos = new Vector3(x, y, z);
 
+                    var worldX = (int)(x + ChunkGameObject.transform.position.x);
+                    var worldY = (int)(y + ChunkGameObject.transform.position.y);
+                    var worldZ = (int)(z + ChunkGameObject.transform.position.z);
+
                     Block.BlockType blockType;
 
-                    blockType = Random.Range(0, 100) < 50 ? Block.BlockType.Grass
-                                                          : Block.BlockType.Air;
-
-                    //blockType = Block.BlockType.Grass;
+                    if (worldY <= Utils.GenerateStoneHeight(worldX,
+                                                            worldZ,
+                                                            stoneOffset: 20,
+                                                            smoothMultiplication: 2.0f,
+                                                            octaveDifference: 1)) 
+                    {
+                        blockType = Block.BlockType.Stone;
+                    }
+                    else if (worldY == Utils.GenerateDirtHeight(worldX, worldZ))
+                    {
+                        blockType = Block.BlockType.Grass;
+                    }
+                    else if (worldY < Utils.GenerateDirtHeight(worldX, worldZ))
+                    {
+                        blockType = Block.BlockType.Dirt;
+                    }
+                    else
+                    {
+                        blockType = Block.BlockType.Air;
+                    }
 
                     ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
                 }
@@ -46,7 +66,6 @@ public class Chunk
 
     public void DrawChunk()
     {
-
         for (var z = 0; z < World.ChunkSize; z++)
         {
             for (var y = 0; y < World.ChunkSize; y++)
@@ -66,7 +85,7 @@ public class Chunk
     /// <summary>
     /// Combine the quads into a cube
     /// </summary>
-    void CombineQuads()
+    private void CombineQuads()
     {
         //Combine children meshes
         var meshFilters = ChunkGameObject.GetComponentsInChildren<MeshFilter>();
