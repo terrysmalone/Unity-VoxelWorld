@@ -2,7 +2,7 @@
 
 public class Block {
 
-    public enum BlockType { Grass, Dirt, Stone, Diamond, Gold, Air }
+    public enum BlockType { None, Grass, Dirt, Stone, Diamond, Gold, Air }
 
     private enum CubeSide { Bottom, Top, Left, Right, Front, Back }
 
@@ -254,10 +254,10 @@ public class Block {
         }
         else
         {
-            uv00 = m_BlockUVs[(int)(m_BlockType + 1), 0];
-            uv10 = m_BlockUVs[(int)(m_BlockType + 1), 1];
-            uv01 = m_BlockUVs[(int)(m_BlockType + 1), 2];
-            uv11 = m_BlockUVs[(int)(m_BlockType + 1), 3];
+            uv00 = m_BlockUVs[(int)(m_BlockType), 0];
+            uv10 = m_BlockUVs[(int)(m_BlockType), 1];
+            uv01 = m_BlockUVs[(int)(m_BlockType), 2];
+            uv11 = m_BlockUVs[(int)(m_BlockType), 3];
         }
     }
 

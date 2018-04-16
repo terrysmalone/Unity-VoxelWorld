@@ -2,8 +2,6 @@
 
 public class TerrainGenerationUtils
 {
-    private static int   m_MaxHeight   = 150;    // Max height of terrain
-    
     public static float GenerateCave(float x,
                                      float y,
                                      float z,
@@ -25,31 +23,21 @@ public class TerrainGenerationUtils
     }
 
 
-    public static int GenerateStoneHeight(float x,
-                                          float z,
-                                          int stoneOffset,
-                                          float smooth,
-                                          int octaves,
-                                          float persistence)
+    public static int GenerateTerrain(float x,
+                                      float z,
+                                      int maxHeight,
+                                      float smooth,
+                                      int octaves,
+                                      float persistence)
     {
         var height = Map(0,
-                         m_MaxHeight + stoneOffset,
+                         maxHeight,
                          0,
                          1,
                          FractalBrownianMotion(x * smooth,
                                                z * smooth,
                                                octaves,
                                                persistence));
-
-        return (int) height;
-    }
-
-    public static int GenerateDirtHeight(float x, float z, float smooth, int octaves, float persistence)
-    {
-        var height = Map(0, m_MaxHeight, 0, 1, FractalBrownianMotion(x * smooth,
-                                                                     z * smooth,
-                                                                     octaves,
-                                                                     persistence));
 
         return (int) height;
     }
@@ -74,9 +62,11 @@ public class TerrainGenerationUtils
         float amplitude = 1;
         float maxValue = 0;
 
+        const float offset = 32000f;
+
         for (var i = 0; i < octaves; i++)
         {
-            total += Mathf.PerlinNoise(x * frequency, z * frequency) * amplitude;
+            total += Mathf.PerlinNoise((x + offset) * frequency, (z + offset) * frequency) * amplitude;
 
             maxValue += amplitude;
             amplitude *= persistence;

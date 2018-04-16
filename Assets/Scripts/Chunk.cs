@@ -7,11 +7,20 @@ public class Chunk
     public Block[,,] ChunkData;
 
     public GameObject ChunkGameObject;
-    
+
+    public enum ChunkStatus { Draw, Done, Keep }
+
+    public ChunkStatus status;
+
     //Terrain generation values
-    private readonly float m_CaveProbability = 0.45f;    //0 = no caves, 1 = all the caves
-    private readonly float m_DiamondProbability = 0.3f; //0 = no diamond, 1 = all the diamonds
-    private readonly float m_GoldProbability = 0.35f;    //0 = no diamond, 1 = all the diamonds
+    private readonly float m_CaveProbability = 0.4f;    // 0 = less caves, 1 = more caves
+    
+    private readonly float m_DiamondProbability = 0.31f; // 0 = less diamond, 1 = more diamonds
+    private readonly float m_DiamondMaxHeight = 80;    // Maximum height diamond can spawn
+
+    private readonly float m_GoldProbability = 0.32f;    // 0 = less gold, 1 = more gold
+    private readonly float m_GoldMaxHeight = 100; // Maximum height diamond can spawn
+
 
     public Chunk(Vector3 position, Material material)
     {
@@ -40,76 +49,151 @@ public class Chunk
                     var worldY = (int)(y + ChunkGameObject.transform.position.y);
                     var worldZ = (int)(z + ChunkGameObject.transform.position.z);
 
-                    Block.BlockType blockType;
-
-                    if (TerrainGenerationUtils.GenerateCave(worldX, 
-                                                            worldY, 
-                                                            worldZ,
-                                                            smooth : 0.05f,
-                                                            octaves: 3,
-                                                            persistence : 0.5f) < m_CaveProbability)
-                    {    
-                        blockType = Block.BlockType.Air;               
-                    }                                                   
-                    else if (worldY <= TerrainGenerationUtils.GenerateStoneHeight(worldX,
-                                                                                  worldZ,
-                                                                                  stoneOffset: -20,
-                                                                                  smooth: 0.01f,
-                                                                                  octaves: 3,
-                                                                                  persistence: 0.05f)) 
-                    {
-                        if (TerrainGenerationUtils.GenerateResource(worldX,
-                                                                    worldY,
-                                                                    worldZ,
-                                                                    smooth: 0.35f,
-                                                                    octaves: 2,
-                                                                    persistence: 0.05f) < m_DiamondProbability)
-                        {
-                            blockType = Block.BlockType.Diamond;
-
-                            World.DebugDiamondCount++;
-                        }
-                        else if (TerrainGenerationUtils.GenerateResource(worldX,
-                                                                         worldY,
-                                                                         worldZ,
-                                                                         smooth: 0.4f,
-                                                                         octaves: 2,
-                                                                         persistence: 0.05f) < m_GoldProbability)
-                        {
-                            blockType = Block.BlockType.Gold;
-
-                            World.DebugGoldCount++;
-                        }
-                        else
-                        {
-                            blockType = Block.BlockType.Stone;
-                        }
-                    }
-                    else if (worldY == TerrainGenerationUtils.GenerateDirtHeight(worldX, 
-                                                                                 worldZ,
-                                                                                 smooth: 0.002f, 
-                                                                                 octaves: 4, 
-                                                                                 persistence: 0.5f))
-                    {
-                        blockType = Block.BlockType.Grass;
-                    }
-                    else if (worldY < TerrainGenerationUtils.GenerateDirtHeight(worldX,
-                                                                                worldZ,
-                                                                                smooth: 0.002f, 
-                                                                                octaves: 4, 
-                                                                                persistence: 0.5f))
-                    { 
-                        blockType = Block.BlockType.Dirt;                              
-                    }                                                                  
-                    else                                                        
-                    {
-                        blockType = Block.BlockType.Air;
-                    }
-
+                    var blockType = GenerateBlockType(worldX, worldY, worldZ);
+                    
                     ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
+
+                    status = ChunkStatus.Draw;
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Generally we want to start from the bottom up for terrain 
+    /// and from least rare to more rare for resources
+    /// </summary>
+    /// <param name="worldX"></param>
+    /// <param name="worldY"></param>
+    /// <param name="worldZ"></param>
+    /// <returns></returns>
+    private Block.BlockType GenerateBlockType(int worldX, int worldY, int worldZ)
+    {
+        //if (CheckForChasm(worldX, worldY, worldZ))
+        //{
+        //    return Block.BlockType.Air;
+        //}
+
+        if (CheckForCave(worldX, worldY, worldZ))
+        {
+            return Block.BlockType.Air;
+        }
+
+            if (CheckForStone(worldX, worldY, worldZ))
+        {
+            //if (CheckForCave(worldX, worldY, worldZ))
+            //{
+            //    return Block.BlockType.Air;
+            //}
+
+            //Check for anything within  stone
+            var blockType = GenerateResources(worldX, worldY, worldZ);
+
+            //If there's nothing in the stone, return stone
+            if (blockType == Block.BlockType.None)
+            {
+                blockType = Block.BlockType.Stone;
+            }
+
+            return blockType;
+        }
+
+        //We check for dirt or grasss
+        var dirtType = CheckForDirt(worldX, worldY, worldZ);
+
+        //If it's none it's not dirt or grass
+        if(dirtType != Block.BlockType.None)
+        {
+            return dirtType;
+        }
+        
+        //If it's nothing else, make it air
+        return Block.BlockType.Air;
+    }
+    
+    private bool CheckForCave(int worldX, int worldY, int worldZ)
+    {
+        return TerrainGenerationUtils.GenerateCave(worldX,
+                                                   worldY,
+                                                   worldZ,
+                                                   smooth: 0.05f,
+                                                   octaves: 3,
+                                                   persistence: 0.5f) < m_CaveProbability;
+    }
+
+    private bool CheckForChasm(int worldX, int worldY, int worldZ)
+    {
+        return worldY <= TerrainGenerationUtils.GenerateTerrain(
+            worldX,
+            worldZ,
+            maxHeight: 200,
+            smooth: 0.06f,
+            octaves: 3,
+            persistence: 0.5f);
+    }
+
+    private static bool CheckForStone(int worldX, int worldY, int worldZ)
+    {
+        return worldY <= TerrainGenerationUtils.GenerateTerrain(worldX,
+                                                                worldZ,
+                                                                maxHeight: 130,
+                                                                smooth: 0.014f,
+                                                                octaves: 3,
+                                                                persistence: 0.05f);
+    }
+
+    private static Block.BlockType CheckForDirt(int worldX, int worldY, int worldZ)
+    {
+        int terrain = TerrainGenerationUtils.GenerateTerrain(worldX,
+                                                             worldZ,
+                                                             maxHeight: 150,
+                                                             smooth: 0.005f,
+                                                             octaves: 4,
+                                                             persistence: 0.05f);
+        if (worldY == terrain)
+        {
+            return Block.BlockType.Grass;
+        }
+
+        if (worldY < terrain)
+        {
+            return Block.BlockType.Dirt;
+        }
+
+        return Block.BlockType.None;
+    }
+
+    private Block.BlockType GenerateResources(int worldX, int worldY, int worldZ)
+    {
+        //Diamonds
+        if (TerrainGenerationUtils.GenerateResource(worldX,
+                                                    worldY,
+                                                    worldZ,
+                                                    smooth: 0.35f,
+                                                    octaves: 2,
+                                                    persistence: 0.05f) < m_DiamondProbability 
+            && worldY <= m_DiamondMaxHeight)
+        {
+            World.DebugDiamondCount++;
+
+            return Block.BlockType.Diamond;
+        }
+
+        //Gold
+        if (TerrainGenerationUtils.GenerateResource(worldX,
+                                                    worldY,
+                                                    worldZ,
+                                                    smooth: 0.4f,
+                                                    octaves: 2,
+                                                    persistence: 0.05f) < m_GoldProbability
+            && worldY <= m_GoldMaxHeight)
+        {
+            World.DebugGoldCount++;
+
+            return Block.BlockType.Gold;
+        }
+
+        return Block.BlockType.None;
     }
 
     public void DrawChunk()
@@ -128,6 +212,9 @@ public class Chunk
         //yield return null;
 
         CombineQuads();
+
+        var collider = ChunkGameObject.gameObject.AddComponent(typeof(MeshCollider)) as MeshCollider;
+        collider.sharedMesh = ChunkGameObject.transform.GetComponent<MeshFilter>().mesh;
     }
 
     /// <summary>

@@ -1,18 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class World : MonoBehaviour {
+public class World : MonoBehaviour
+{
+
+    public GameObject Player;
 
     public Material TextureAtlas;
     public static int ColumnHeight = 16;
     public static int ChunkSize = 16;
-    public static int WorldSize = 4;
-
+    public static int buildRadius = 1;
+    
     public static Dictionary<string, Chunk> Chunks;
+
+    private bool m_FirstBuild = true;
+    private bool m_Building;
 
     public static int DebugDiamondCount = 0;
     public static int DebugGoldCount = 0;
+
+    //UI
+    public Slider loadingBar;
+    public Camera camera;
+    public Button startButton;
 
     public static string BuildChunkName(Vector3 v)
     {
@@ -21,71 +33,131 @@ public class World : MonoBehaviour {
 
     private IEnumerator BuildWorld()
     {
-        for(var z = 0; z < WorldSize; z++)
+        m_Building = true;
+
+        var posX = (int) Mathf.Floor(Player.transform.position.x / ChunkSize);
+        var posZ = (int)Mathf.Floor(Player.transform.position.z / ChunkSize);
+
+        var totalChunks = (Mathf.Pow(buildRadius * 2+1, 2) * ColumnHeight) *2;
+        var processCount = 0;
+
+        for (var z = -buildRadius; z <= buildRadius; z++)
         {
-            for(var x = 0; x < WorldSize; x++)
+            for(var x = -buildRadius; x <= buildRadius; x++)
             {
                 for(var y = 0; y < ColumnHeight; y++)
                 {
-                    var chunkPosition = new Vector3(x * ChunkSize,
+                    var chunkPosition = new Vector3((x+posX) * ChunkSize,
                                                     y * ChunkSize,
-                                                    z * ChunkSize);
+                                                    (z + posZ) * ChunkSize);
 
-                    var c = new Chunk(chunkPosition, TextureAtlas);
+                    var chunkName = BuildChunkName(chunkPosition);
 
-                    c.ChunkGameObject.transform.parent = transform;
+                    Chunk chunk;
 
-                    Chunks.Add(c.ChunkGameObject.name, c);
+                    if (Chunks.TryGetValue(chunkName, out chunk))
+                    {
+                        chunk.status = Chunk.ChunkStatus.Keep;
+                        break;  //Break out of this column because they will all be to keep
+                    }
+
+                    chunk = new Chunk(chunkPosition, TextureAtlas);
+                    chunk.ChunkGameObject.transform.parent = transform;
+
+                    Chunks.Add(chunk.ChunkGameObject.name, chunk);
+
+                    if (m_FirstBuild)
+                    {
+                        processCount++;
+                        loadingBar.value = processCount / totalChunks * 100;
+                    }
+
+                    yield return null;
                 }
             }
         }
 
-        foreach(var c in Chunks)
+        foreach(var chunk in Chunks)
         {
-            c.Value.DrawChunk();
+            if (chunk.Value.status == Chunk.ChunkStatus.Draw)
+            {
+                chunk.Value.DrawChunk();
+
+                chunk.Value.status = Chunk.ChunkStatus.Keep;
+            }
+
+            //delete old chunks here
+
+            chunk.Value.status = Chunk.ChunkStatus.Done;
+
+            if (m_FirstBuild)
+            {
+                processCount++;
+                loadingBar.value = processCount / totalChunks * 100;
+            }
 
             yield return null;
         }
 
         PrintDebugValues();
-        
+
+        if (m_FirstBuild)
+        {
+            Player.SetActive(true);
+
+            loadingBar.gameObject.SetActive(false);
+            camera.gameObject.SetActive(false);
+            startButton.gameObject.SetActive(false);
+
+            m_FirstBuild = false;
+        }
+
+        m_Building = false;
     }
 
     private static void PrintDebugValues()
     {
         var numOfBlocksInChunk = ChunkSize * ChunkSize * ChunkSize;
-        var numOfBlocks = WorldSize * WorldSize * numOfBlocksInChunk;
+        var numOfBlocks = buildRadius * buildRadius * numOfBlocksInChunk;
 
-        Debug.Log("Number of Chunks: " + WorldSize * WorldSize);
+        Debug.Log("Number of Chunks: " + buildRadius * buildRadius);
         Debug.Log("Number of Blocks: " + numOfBlocks);
 
         Debug.Log("---------------------------------------------");
         
         Debug.Log("Diamonds: " + DebugDiamondCount);
-        Debug.Log("Diamonds(per chunk): " + (double)DebugDiamondCount / (WorldSize * WorldSize) + "/" + numOfBlocksInChunk);
+        Debug.Log("Diamonds(per chunk): " + (double)DebugDiamondCount / (buildRadius * buildRadius) + "/" + numOfBlocksInChunk);
         Debug.Log("Diamonds(per block): " + (double)DebugDiamondCount / (double)numOfBlocks);
 
         Debug.Log("---------------------------------------------");
 
         Debug.Log("Gold: " + DebugGoldCount);
-        Debug.Log("Gold(per chunk): " + (double)DebugGoldCount / (WorldSize * WorldSize) + "/" + numOfBlocksInChunk);
+        Debug.Log("Gold(per chunk): " + (double)DebugGoldCount / (buildRadius * buildRadius) + "/" + numOfBlocksInChunk);
         Debug.Log("Gold(per block): " + (double)DebugGoldCount / (double)numOfBlocks);
 
+    }
+
+    public void StartBuild()
+    {
+        StartCoroutine(BuildWorld());
     }
 
     // Use this for initialization
     private void Start ()
     {
+        Player.SetActive(false);
+
         Chunks = new Dictionary<string, Chunk>();
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.identity;
+    }
 
-        StartCoroutine(BuildWorld());
-	}
-	
-	// Update is called once per frame
+    // Update is called once per frame
     private void Update ()
     {
-		
+        if (!m_Building && !m_FirstBuild)
+        {
+            StartCoroutine(BuildWorld());
+        }
 	}
 }
