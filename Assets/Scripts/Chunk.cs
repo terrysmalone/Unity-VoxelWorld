@@ -7,6 +7,11 @@ public class Chunk
     public Block[,,] ChunkData;
 
     public GameObject ChunkGameObject;
+    
+    //Terrain generation values
+    private readonly float m_CaveProbability = 0.45f;    //0 = no caves, 1 = all the caves
+    private readonly float m_DiamondProbability = 0.3f; //0 = no diamond, 1 = all the diamonds
+    private readonly float m_GoldProbability = 0.35f;    //0 = no diamond, 1 = all the diamonds
 
     public Chunk(Vector3 position, Material material)
     {
@@ -37,23 +42,66 @@ public class Chunk
 
                     Block.BlockType blockType;
 
-                    if (worldY <= Utils.GenerateStoneHeight(worldX,
+                    if (TerrainGenerationUtils.GenerateCave(worldX, 
+                                                            worldY, 
                                                             worldZ,
-                                                            stoneOffset: 20,
-                                                            smoothMultiplication: 2.0f,
-                                                            octaveDifference: 1)) 
+                                                            smooth : 0.05f,
+                                                            octaves: 3,
+                                                            persistence : 0.5f) < m_CaveProbability)
+                    {    
+                        blockType = Block.BlockType.Air;               
+                    }                                                   
+                    else if (worldY <= TerrainGenerationUtils.GenerateStoneHeight(worldX,
+                                                                                  worldZ,
+                                                                                  stoneOffset: -20,
+                                                                                  smooth: 0.01f,
+                                                                                  octaves: 3,
+                                                                                  persistence: 0.05f)) 
                     {
-                        blockType = Block.BlockType.Stone;
+                        if (TerrainGenerationUtils.GenerateResource(worldX,
+                                                                    worldY,
+                                                                    worldZ,
+                                                                    smooth: 0.35f,
+                                                                    octaves: 2,
+                                                                    persistence: 0.05f) < m_DiamondProbability)
+                        {
+                            blockType = Block.BlockType.Diamond;
+
+                            World.DebugDiamondCount++;
+                        }
+                        else if (TerrainGenerationUtils.GenerateResource(worldX,
+                                                                         worldY,
+                                                                         worldZ,
+                                                                         smooth: 0.4f,
+                                                                         octaves: 2,
+                                                                         persistence: 0.05f) < m_GoldProbability)
+                        {
+                            blockType = Block.BlockType.Gold;
+
+                            World.DebugGoldCount++;
+                        }
+                        else
+                        {
+                            blockType = Block.BlockType.Stone;
+                        }
                     }
-                    else if (worldY == Utils.GenerateDirtHeight(worldX, worldZ))
+                    else if (worldY == TerrainGenerationUtils.GenerateDirtHeight(worldX, 
+                                                                                 worldZ,
+                                                                                 smooth: 0.002f, 
+                                                                                 octaves: 4, 
+                                                                                 persistence: 0.5f))
                     {
                         blockType = Block.BlockType.Grass;
                     }
-                    else if (worldY < Utils.GenerateDirtHeight(worldX, worldZ))
-                    {
-                        blockType = Block.BlockType.Dirt;
-                    }
-                    else
+                    else if (worldY < TerrainGenerationUtils.GenerateDirtHeight(worldX,
+                                                                                worldZ,
+                                                                                smooth: 0.002f, 
+                                                                                octaves: 4, 
+                                                                                persistence: 0.5f))
+                    { 
+                        blockType = Block.BlockType.Dirt;                              
+                    }                                                                  
+                    else                                                        
                     {
                         blockType = Block.BlockType.Air;
                     }

@@ -2,9 +2,9 @@
 
 public class Block {
 
-    public enum BlockType { Grass, Dirt, Stone, Air };
+    public enum BlockType { Grass, Dirt, Stone, Diamond, Gold, Air }
 
-    private enum CubeSide { Bottom, Top, Left, Right, Front, Back };
+    private enum CubeSide { Bottom, Top, Left, Right, Front, Back }
 
     public bool IsSolid;
 
@@ -35,7 +35,17 @@ public class Block {
         /* Stone */ { new Vector2(0, 0.875f),
                       new Vector2(0.0625f, 0.875f),
                       new Vector2(0, 0.9375f),
-                      new Vector2(0.0625f, 0.9375f) }
+                      new Vector2(0.0625f, 0.9375f) },
+
+        /* Diamond */ { new Vector2(0.125f, 0.75f),
+                        new Vector2(0.1875f, 0.75f),
+                        new Vector2(0.125f, 0.8125f),
+                        new Vector2(0.1875f, 0.8125f) },
+
+        /* Gold */ { new Vector2(0, 0.825f),
+                     new Vector2(0.0625f, 0.8125f),
+                     new Vector2(0, 0.875f),
+                     new Vector2(0.0625f, 0.875f) }
     };
 
     public Block(BlockType blockType, Vector3 position, GameObject parent, Chunk owner)
@@ -45,14 +55,7 @@ public class Block {
         m_Position = position;
         m_Owner = owner;
         
-        if (m_BlockType == BlockType.Air)
-        {
-            IsSolid = false;
-        }
-        else
-        {
-            IsSolid = true;
-        }
+        IsSolid = m_BlockType != BlockType.Air;
     }
 
     public void Draw()
@@ -242,7 +245,7 @@ public class Block {
             uv01 = m_BlockUVs[2, 2];
             uv11 = m_BlockUVs[2, 3];
         }
-        else if (m_BlockType == BlockType.Grass)
+        else if (m_BlockType == BlockType.Grass) //Dirt
         {
             uv00 = m_BlockUVs[1, 0];
             uv10 = m_BlockUVs[1, 1];

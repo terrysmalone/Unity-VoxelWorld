@@ -7,9 +7,12 @@ public class World : MonoBehaviour {
     public Material TextureAtlas;
     public static int ColumnHeight = 16;
     public static int ChunkSize = 16;
-    public static int WorldSize = 8;
+    public static int WorldSize = 4;
 
     public static Dictionary<string, Chunk> Chunks;
+
+    public static int DebugDiamondCount = 0;
+    public static int DebugGoldCount = 0;
 
     public static string BuildChunkName(Vector3 v)
     {
@@ -43,6 +46,31 @@ public class World : MonoBehaviour {
 
             yield return null;
         }
+
+        PrintDebugValues();
+        
+    }
+
+    private static void PrintDebugValues()
+    {
+        var numOfBlocksInChunk = ChunkSize * ChunkSize * ChunkSize;
+        var numOfBlocks = WorldSize * WorldSize * numOfBlocksInChunk;
+
+        Debug.Log("Number of Chunks: " + WorldSize * WorldSize);
+        Debug.Log("Number of Blocks: " + numOfBlocks);
+
+        Debug.Log("---------------------------------------------");
+        
+        Debug.Log("Diamonds: " + DebugDiamondCount);
+        Debug.Log("Diamonds(per chunk): " + (double)DebugDiamondCount / (WorldSize * WorldSize) + "/" + numOfBlocksInChunk);
+        Debug.Log("Diamonds(per block): " + (double)DebugDiamondCount / (double)numOfBlocks);
+
+        Debug.Log("---------------------------------------------");
+
+        Debug.Log("Gold: " + DebugGoldCount);
+        Debug.Log("Gold(per chunk): " + (double)DebugGoldCount / (WorldSize * WorldSize) + "/" + numOfBlocksInChunk);
+        Debug.Log("Gold(per block): " + (double)DebugGoldCount / (double)numOfBlocks);
+
     }
 
     // Use this for initialization
