@@ -1,34 +1,35 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class TerrainGenerationUtils
 {
-    public static float GenerateCave(float x,
-                                     float y,
-                                     float z,
-                                     float smooth      = 0.05f,
-                                     int   octaves     = 3,
-                                     float persistence = 0.5f)
+    internal static float GenerateCave(float x,
+                                       float y,
+                                       float z,
+                                       float smooth      = 0.05f,
+                                       int   octaves     = 3,
+                                       float persistence = 0.5f)
     {
         return FractalBrownianMotion3D(x, y, z, smooth, octaves, persistence);
     }
 
-    public static float GenerateResource(float x,
-                                         float y,
-                                         float z,
-                                         float smooth      = 0.01f,
-                                         int   octaves     = 2,
-                                         float persistence = 0.5f)
+    internal static float GenerateResource(float x,
+                                           float y,
+                                           float z,
+                                           float smooth      = 0.01f,
+                                           int   octaves     = 2,
+                                           float persistence = 0.5f)
     {
         return FractalBrownianMotion3D(x, y, z, smooth, octaves, persistence);
     }
 
 
-    public static int GenerateTerrain(float x,
-                                      float z,
-                                      int maxHeight,
-                                      float smooth,
-                                      int octaves,
-                                      float persistence)
+    internal static int GenerateTerrain(float x,
+                                        float z,
+                                        int maxHeight,
+                                        float smooth,
+                                        int octaves,
+                                        float persistence)
     {
         var height = Map(0,
                          maxHeight,

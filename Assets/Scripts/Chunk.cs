@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Chunk
 {
@@ -15,11 +16,11 @@ public class Chunk
     //Terrain generation values
     private readonly float m_CaveProbability = 0.4f;    // 0 = less caves, 1 = more caves
     
-    private readonly float m_DiamondProbability = 0.31f; // 0 = less diamond, 1 = more diamonds
-    private readonly float m_DiamondMaxHeight = 80;    // Maximum height diamond can spawn
+    private readonly float m_DiamondProbability = 0.32f; // 0 = less diamond, 1 = more diamonds
+    private readonly float m_DiamondMaxHeight = 20;    // Maximum height diamond can spawn
 
     private readonly float m_GoldProbability = 0.32f;    // 0 = less gold, 1 = more gold
-    private readonly float m_GoldMaxHeight = 100; // Maximum height diamond can spawn
+    private readonly float m_GoldMaxHeight = 40; // Maximum height diamond can spawn
 
 
     public Chunk(Vector3 position, Material material)
@@ -39,21 +40,27 @@ public class Chunk
 
         for (var z = 0; z < World.ChunkSize; z++)
         {
+            var worldZ = (int)(z + ChunkGameObject.transform.position.z);
+
             for (var y = 0; y < World.ChunkSize; y++)
             {
-                for (var x = 0; x < World.ChunkSize; x++)
+                var worldY = (int)(y + ChunkGameObject.transform.position.y);
+
+                if (worldY >= 0)
                 {
-                    var pos = new Vector3(x, y, z);
 
-                    var worldX = (int)(x + ChunkGameObject.transform.position.x);
-                    var worldY = (int)(y + ChunkGameObject.transform.position.y);
-                    var worldZ = (int)(z + ChunkGameObject.transform.position.z);
+                    for (var x = 0; x < World.ChunkSize; x++)
+                    {
+                        var pos = new Vector3(x, y, z);
 
-                    var blockType = GenerateBlockType(worldX, worldY, worldZ);
-                    
-                    ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
+                        var worldX = (int)(x + ChunkGameObject.transform.position.x);
 
-                    status = ChunkStatus.Draw;
+                        var blockType = GenerateBlockType(worldX, worldY, worldZ);
+
+                        ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
+
+                        status = ChunkStatus.Draw;
+                    }
                 }
             }
         }
@@ -74,12 +81,17 @@ public class Chunk
         //    return Block.BlockType.Air;
         //}
 
+        if (worldY == 0)
+        {
+            return Block.BlockType.Bedrock;
+        }
+
         if (CheckForCave(worldX, worldY, worldZ))
         {
             return Block.BlockType.Air;
         }
 
-            if (CheckForStone(worldX, worldY, worldZ))
+        if (CheckForStone(worldX, worldY, worldZ))
         {
             //if (CheckForCave(worldX, worldY, worldZ))
             //{
@@ -92,7 +104,7 @@ public class Chunk
             //If there's nothing in the stone, return stone
             if (blockType == Block.BlockType.None)
             {
-                blockType = Block.BlockType.Stone;
+                blockType = Block.BlockType.CobbleStoneRaw;
             }
 
             return blockType;
@@ -144,12 +156,8 @@ public class Chunk
 
     private static Block.BlockType CheckForDirt(int worldX, int worldY, int worldZ)
     {
-        int terrain = TerrainGenerationUtils.GenerateTerrain(worldX,
-                                                             worldZ,
-                                                             maxHeight: 150,
-                                                             smooth: 0.005f,
-                                                             octaves: 4,
-                                                             persistence: 0.05f);
+        var terrain = GetDirtHeight(worldX, worldZ);
+        
         if (worldY == terrain)
         {
             return Block.BlockType.Grass;
@@ -161,6 +169,16 @@ public class Chunk
         }
 
         return Block.BlockType.None;
+    }
+
+    internal static int GetDirtHeight(int worldX, int worldZ)
+    {
+        return TerrainGenerationUtils.GenerateTerrain(worldX,
+                                                      worldZ,
+                                                      maxHeight: 150,
+                                                      smooth: 0.005f,
+                                                      octaves: 4,
+                                                      persistence: 0.05f);
     }
 
     private Block.BlockType GenerateResources(int worldX, int worldY, int worldZ)
@@ -204,17 +222,19 @@ public class Chunk
             {
                 for (var x = 0; x < World.ChunkSize; x++)
                 {
-                    ChunkData[x, y, z].Draw();
+                    if (ChunkData[x, y, z] != null)
+                    {
+                        ChunkData[x, y, z].Draw();
+                    }
                 }
             }
         }    
-
-        //yield return null;
-
+        
         CombineQuads();
 
-        var collider = ChunkGameObject.gameObject.AddComponent(typeof(MeshCollider)) as MeshCollider;
+        var collider = ChunkGameObject.AddComponent(typeof(MeshCollider)) as MeshCollider;
         collider.sharedMesh = ChunkGameObject.transform.GetComponent<MeshFilter>().mesh;
+        status = ChunkStatus.Done;
     }
 
     /// <summary>

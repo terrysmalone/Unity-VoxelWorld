@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Block {
 
-    public enum BlockType { None, Grass, Dirt, Stone, Diamond, Gold, Air }
+    public enum BlockType { None, Dirt, Grass, CobbleStoneRaw, Bedrock, Diamond, Gold, CobbleStone, Air }
 
     private enum CubeSide { Bottom, Top, Left, Right, Front, Back }
 
@@ -15,38 +16,63 @@ public class Block {
     private Vector3 m_Position;
     //Material m_CubeMaterial;
 
+    private static Vector2 dirtPos = new Vector2(0, 0);
+    private static Vector2 grassSidePos = new Vector2(1, 0);
+    private static Vector2 grassPos = new Vector2(2, 0);
+    private static Vector2 cobbleStoneRawPos = new Vector2(3, 0);
+    private static Vector2 bedrockPos = new Vector2(4, 0);
+
+    private static Vector2 diamondPos = new Vector2(0, 1);
+    private static Vector2 goldPos = new Vector2(1, 1);
+
     private readonly Vector2[,] m_BlockUVs =
     {
-        /* Grass top */ { new Vector2(0.125f, 0.375f),
-                          new Vector2(0.1875f, 0.375f),
-                          new Vector2(0.125f, 0.4375f),
-                          new Vector2(0.1875f, 0.4375f) },
+        /* Dirt */ { new Vector2(dirtPos.x / 16, (16 - dirtPos.y - 1) / 16),
+                     new Vector2((dirtPos.x + 1) / 16, (16 - dirtPos.y - 1) / 16),
+                     new Vector2(dirtPos.x / 16, (16 - dirtPos.y) / 16),
+                     new Vector2((dirtPos.x + 1) / 16, (16 - dirtPos.y) / 16) },
 
-        /* Grass side */ { new Vector2(0.1875f, 0.9375f),
-                           new Vector2(0.25f, 0.9375f),
-                           new Vector2(0.1875f, 1.0f),
-                           new Vector2(0.25f, 1.0f) },
+        /* GrassSide */ { new Vector2(grassSidePos.x / 16, (16 - grassSidePos.y - 1) / 16),
+                          new Vector2((grassSidePos.x + 1) / 16, (16 - grassSidePos.y - 1) / 16),
+                          new Vector2(grassSidePos.x / 16, (16 - grassSidePos.y) / 16),
+                          new Vector2((grassSidePos.x + 1) / 16, (16 - grassSidePos.y) / 16) },
 
-        /* Dirt */ { new Vector2(0.125f, 0.9375f),
-                     new Vector2(0.1875f, 0.9375f),
-                     new Vector2(0.125f, 1.0f),
-                     new Vector2(0.1875f, 1.0f) },
+        /* Grass */ { new Vector2(grassPos.x / 16,       (16 - grassPos.y - 1) / 16),
+                      new Vector2((grassPos.x + 1) / 16, (16 - grassPos.y - 1) / 16),
+                      new Vector2(grassPos.x / 16,  (16 - grassPos.y) / 16),
+                      new Vector2((grassPos.x + 1) / 16, (16 - grassPos.y) / 16) },
 
-        /* Stone */ { new Vector2(0, 0.875f),
-                      new Vector2(0.0625f, 0.875f),
-                      new Vector2(0, 0.9375f),
-                      new Vector2(0.0625f, 0.9375f) },
+        /* Cobblestone raw */ { new Vector2(cobbleStoneRawPos.x / 16, (16 - cobbleStoneRawPos.y - 1) / 16),
+                                new Vector2((cobbleStoneRawPos.x + 1) / 16, (16 - cobbleStoneRawPos.y - 1) / 16),
+                                new Vector2(cobbleStoneRawPos.x / 16, (16 - cobbleStoneRawPos.y) / 16),
+                                new Vector2((cobbleStoneRawPos.x + 1) / 16, (16 - cobbleStoneRawPos.y) / 16) },
 
-        /* Diamond */ { new Vector2(0.125f, 0.75f),
-                        new Vector2(0.1875f, 0.75f),
-                        new Vector2(0.125f, 0.8125f),
-                        new Vector2(0.1875f, 0.8125f) },
+         /* Bedrock */ { new Vector2(bedrockPos.x / 16, (16 - bedrockPos.y - 1) / 16),
+                         new Vector2((bedrockPos.x + 1) / 16, (16 - bedrockPos.y - 1) / 16),
+                         new Vector2(bedrockPos.x / 16, (16 - bedrockPos.y) / 16),
+                         new Vector2((bedrockPos.x + 1) / 16, (16 - bedrockPos.y) / 16) },
 
-        /* Gold */ { new Vector2(0, 0.825f),
-                     new Vector2(0.0625f, 0.8125f),
-                     new Vector2(0, 0.875f),
-                     new Vector2(0.0625f, 0.875f) }
+         /* Diamond */ { new Vector2(diamondPos.x / 16, (16 - diamondPos.y - 1) / 16),
+                         new Vector2((diamondPos.x + 1) / 16, (16 - diamondPos.y - 1) / 16),
+                         new Vector2(diamondPos.x / 16, (16 - diamondPos.y) / 16),
+                         new Vector2((diamondPos.x + 1) / 16, (16 - diamondPos.y) / 16) },
+
+         /* Gold */ { new Vector2(goldPos.x / 16, (16 - goldPos.y - 1) / 16),
+                      new Vector2((goldPos.x + 1) / 16, (16 - goldPos.y - 1) / 16),
+                      new Vector2(goldPos.x / 16, (16 - goldPos.y) / 16),
+                      new Vector2((goldPos.x + 1) / 16, (16 - goldPos.y) / 16) },
     };
+
+    private static Vector2[] GetVectors(Vector2 pos)
+    {
+        return new[]
+        {
+            new Vector2((pos.x + 1) / 16, (16 - pos.y) / 16),
+            new Vector2(pos.x / 16, (16 - pos.y) / 16),
+            new Vector2((pos.x + 1) / 16, (16 - pos.y + 1) / 16),
+            new Vector2(pos.x / 16, (16 - pos.y + 1) / 16)
+        };
+    }
 
     public Block(BlockType blockType, Vector3 position, GameObject parent, Chunk owner)
     {
@@ -233,24 +259,31 @@ public class Block {
     {
         if (m_BlockType == BlockType.Grass && cubeSide == CubeSide.Top)
         {
-            uv00 = m_BlockUVs[0, 0];
-            uv10 = m_BlockUVs[0, 1];
-            uv01 = m_BlockUVs[0, 2];
-            uv11 = m_BlockUVs[0, 3];
-        }        
-        else if (m_BlockType == BlockType.Grass && cubeSide == CubeSide.Bottom)
-        {
             uv00 = m_BlockUVs[2, 0];
             uv10 = m_BlockUVs[2, 1];
             uv01 = m_BlockUVs[2, 2];
             uv11 = m_BlockUVs[2, 3];
+        }        
+        else if (m_BlockType == BlockType.Grass && cubeSide == CubeSide.Bottom)
+        {
+            uv00 = m_BlockUVs[0, 0];
+            uv10 = m_BlockUVs[0, 1];
+            uv01 = m_BlockUVs[0, 2];
+            uv11 = m_BlockUVs[0, 3];
         }
-        else if (m_BlockType == BlockType.Grass) //Dirt
+        else if (m_BlockType == BlockType.Grass) 
         {
             uv00 = m_BlockUVs[1, 0];
             uv10 = m_BlockUVs[1, 1];
             uv01 = m_BlockUVs[1, 2];
             uv11 = m_BlockUVs[1, 3];
+        }
+        else if (m_BlockType == BlockType.Dirt)
+        {
+            uv00 = m_BlockUVs[0, 0];
+            uv10 = m_BlockUVs[0, 1];
+            uv01 = m_BlockUVs[0, 2];
+            uv11 = m_BlockUVs[0, 3];
         }
         else
         {
