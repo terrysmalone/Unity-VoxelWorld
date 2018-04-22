@@ -46,8 +46,8 @@ public class Chunk
             {
                 var worldY = (int)(y + ChunkGameObject.transform.position.y);
 
-                if (worldY >= 0)
-                {
+                //if (worldY >= 0)
+                //{
 
                     for (var x = 0; x < World.ChunkSize; x++)
                     {
@@ -61,7 +61,7 @@ public class Chunk
 
                         status = ChunkStatus.Draw;
                     }
-                }
+                //}
             }
         }
     }

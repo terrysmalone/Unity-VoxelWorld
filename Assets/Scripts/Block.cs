@@ -299,8 +299,8 @@ public class Block {
         Block[,,] chunks;
         
         if (x < 0 || x >= World.ChunkSize 
-           || y < 0 || y >= World.ChunkSize 
-           || z < 0 || z >= World.ChunkSize)
+         || y < 0 || y >= World.ChunkSize 
+         || z < 0 || z >= World.ChunkSize)
         {
             //Neighbour is in neighbouring chunk
             
@@ -336,7 +336,14 @@ public class Block {
         {
             return chunks[x, y, z].IsSolid;
         }
-        catch (System.IndexOutOfRangeException) { }
+        catch (System.IndexOutOfRangeException ioore)
+        {
+            Debug.Log("Unknown error when checking for neighbour " + ioore);
+        }
+        catch (Exception exc)
+        {
+            Debug.Log($"Unknown error when checking for neighbour at ({x}, {y}, {z})." + exc);
+        }
 
         return false;
     }
