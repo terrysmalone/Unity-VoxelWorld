@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Scripts.BlockTypes;
 using UnityEngine;
 
 public class Chunk
@@ -11,7 +12,7 @@ public class Chunk
 
     public enum ChunkStatus { Draw, Done, Keep }
 
-    public ChunkStatus status;
+    public ChunkStatus Status;
 
     //Terrain generation values
     private readonly float m_CaveProbability = 0.4f;    // 0 = less caves, 1 = more caves
@@ -51,18 +52,50 @@ public class Chunk
 
                     for (var x = 0; x < World.ChunkSize; x++)
                     {
-                        var pos = new Vector3(x, y, z);
-
                         var worldX = (int)(x + ChunkGameObject.transform.position.x);
 
                         var blockType = GenerateBlockType(worldX, worldY, worldZ);
 
-                        ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this);
-
-                        status = ChunkStatus.Draw;
+                        SetChunkData(x, y, z, blockType);
+                        
+                        Status = ChunkStatus.Draw;
                     }
                 //}
             }
+        }
+    }
+
+    private void SetChunkData(int x, int y, int z, Block.BlockType blockType)
+    {
+        var pos = new Vector3(x, y, z);
+
+        if (blockType == Block.BlockType.Dirt)
+        {
+            ChunkData[x, y, z] = new DirtBlock(pos, ChunkGameObject.gameObject, this, CubeMaterial);
+        }
+        else if (blockType == Block.BlockType.Grass)
+        {
+            ChunkData[x, y, z] = new GrassBlock(pos, ChunkGameObject.gameObject, this, CubeMaterial);
+        }
+        else if (blockType == Block.BlockType.CobbleStoneRaw)
+        {
+            ChunkData[x, y, z] = new CobbleStoneRawBlock(pos, ChunkGameObject.gameObject, this, CubeMaterial);
+        }
+        else if (blockType == Block.BlockType.Bedrock)
+        {
+            ChunkData[x, y, z] = new BedrockBlock(pos, ChunkGameObject.gameObject, this, CubeMaterial);
+        }
+        else if (blockType == Block.BlockType.Diamond)
+        {
+            ChunkData[x, y, z] = new DiamondBlock(pos, ChunkGameObject.gameObject, this, CubeMaterial);
+        }
+        else if (blockType == Block.BlockType.Gold)
+        {
+            ChunkData[x, y, z] = new GoldBlock(pos, ChunkGameObject.gameObject, this, CubeMaterial);
+        }
+        else
+        {
+            ChunkData[x, y, z] = new Block(blockType, pos, ChunkGameObject.gameObject, this, CubeMaterial);
         }
     }
 
@@ -234,7 +267,7 @@ public class Chunk
 
         var collider = ChunkGameObject.AddComponent(typeof(MeshCollider)) as MeshCollider;
         collider.sharedMesh = ChunkGameObject.transform.GetComponent<MeshFilter>().mesh;
-        status = ChunkStatus.Done;
+        Status = ChunkStatus.Done;
     }
 
     /// <summary>
