@@ -89,7 +89,7 @@ public class World : MonoBehaviour
     {
         foreach (var chunk in Chunks)
         {
-            if (chunk.Value.status == Chunk.ChunkStatus.Draw)
+            if (chunk.Value.Status == Chunk.ChunkStatus.Draw)
             {
                 m_DebugChunksDrawn++;
 

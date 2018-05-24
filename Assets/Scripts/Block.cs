@@ -1,7 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-public class Block {
+public class Block
+{
 
     public enum BlockType { None, Dirt, Grass, CobbleStoneRaw, Bedrock, Diamond, Gold, CobbleStone, Air }
 
@@ -9,78 +10,35 @@ public class Block {
 
     public bool IsSolid;
 
-    private readonly BlockType m_BlockType;
-    private readonly GameObject m_Parent;
-    private readonly Chunk m_Owner;
+    public Material CubeMaterial;
 
-    private Vector3 m_Position;
-    //Material m_CubeMaterial;
+    internal BlockType m_BlockType;
+    internal GameObject m_Parent;
+    internal Chunk m_Owner;
 
-    private static Vector2 dirtPos = new Vector2(0, 0);
-    private static Vector2 grassSidePos = new Vector2(1, 0);
-    private static Vector2 grassPos = new Vector2(2, 0);
-    private static Vector2 cobbleStoneRawPos = new Vector2(3, 0);
-    private static Vector2 bedrockPos = new Vector2(4, 0);
+    internal Vector3 m_Position;
 
-    private static Vector2 diamondPos = new Vector2(0, 1);
-    private static Vector2 goldPos = new Vector2(1, 1);
-
-    private readonly Vector2[,] m_BlockUVs =
+    internal Vector2[,] m_BlockUVs =
     {
-        /* Dirt */ { new Vector2(dirtPos.x / 16, (16 - dirtPos.y - 1) / 16),
-                     new Vector2((dirtPos.x + 1) / 16, (16 - dirtPos.y - 1) / 16),
-                     new Vector2(dirtPos.x / 16, (16 - dirtPos.y) / 16),
-                     new Vector2((dirtPos.x + 1) / 16, (16 - dirtPos.y) / 16) },
-
-        /* GrassSide */ { new Vector2(grassSidePos.x / 16, (16 - grassSidePos.y - 1) / 16),
-                          new Vector2((grassSidePos.x + 1) / 16, (16 - grassSidePos.y - 1) / 16),
-                          new Vector2(grassSidePos.x / 16, (16 - grassSidePos.y) / 16),
-                          new Vector2((grassSidePos.x + 1) / 16, (16 - grassSidePos.y) / 16) },
-
-        /* Grass */ { new Vector2(grassPos.x / 16,       (16 - grassPos.y - 1) / 16),
-                      new Vector2((grassPos.x + 1) / 16, (16 - grassPos.y - 1) / 16),
-                      new Vector2(grassPos.x / 16,  (16 - grassPos.y) / 16),
-                      new Vector2((grassPos.x + 1) / 16, (16 - grassPos.y) / 16) },
-
-        /* Cobblestone raw */ { new Vector2(cobbleStoneRawPos.x / 16, (16 - cobbleStoneRawPos.y - 1) / 16),
-                                new Vector2((cobbleStoneRawPos.x + 1) / 16, (16 - cobbleStoneRawPos.y - 1) / 16),
-                                new Vector2(cobbleStoneRawPos.x / 16, (16 - cobbleStoneRawPos.y) / 16),
-                                new Vector2((cobbleStoneRawPos.x + 1) / 16, (16 - cobbleStoneRawPos.y) / 16) },
-
-         /* Bedrock */ { new Vector2(bedrockPos.x / 16, (16 - bedrockPos.y - 1) / 16),
-                         new Vector2((bedrockPos.x + 1) / 16, (16 - bedrockPos.y - 1) / 16),
-                         new Vector2(bedrockPos.x / 16, (16 - bedrockPos.y) / 16),
-                         new Vector2((bedrockPos.x + 1) / 16, (16 - bedrockPos.y) / 16) },
-
-         /* Diamond */ { new Vector2(diamondPos.x / 16, (16 - diamondPos.y - 1) / 16),
-                         new Vector2((diamondPos.x + 1) / 16, (16 - diamondPos.y - 1) / 16),
-                         new Vector2(diamondPos.x / 16, (16 - diamondPos.y) / 16),
-                         new Vector2((diamondPos.x + 1) / 16, (16 - diamondPos.y) / 16) },
-
-         /* Gold */ { new Vector2(goldPos.x / 16, (16 - goldPos.y - 1) / 16),
-                      new Vector2((goldPos.x + 1) / 16, (16 - goldPos.y - 1) / 16),
-                      new Vector2(goldPos.x / 16, (16 - goldPos.y) / 16),
-                      new Vector2((goldPos.x + 1) / 16, (16 - goldPos.y) / 16) },
+        /*TOP*/			{new Vector2( 0.125f, 0.9375f ), new Vector2( 0.1875f, 0.9375f),
+            new Vector2( 0.125f, 1.0f ),new Vector2( 0.1875f, 1.0f )},
+        /*SIDE*/		{new Vector2( 0.125f, 0.9375f ), new Vector2( 0.1875f, 0.9375f),
+            new Vector2( 0.125f, 1.0f ),new Vector2( 0.1875f, 1.0f )},
+        /*BOTTOM*/		{new Vector2( 0.125f, 0.9375f ), new Vector2( 0.1875f, 0.9375f),
+            new Vector2( 0.125f, 1.0f ),new Vector2( 0.1875f, 1.0f )}
     };
+    
+    public Block() { }
 
-    private static Vector2[] GetVectors(Vector2 pos)
-    {
-        return new[]
-        {
-            new Vector2((pos.x + 1) / 16, (16 - pos.y) / 16),
-            new Vector2(pos.x / 16, (16 - pos.y) / 16),
-            new Vector2((pos.x + 1) / 16, (16 - pos.y + 1) / 16),
-            new Vector2(pos.x / 16, (16 - pos.y + 1) / 16)
-        };
-    }
-
-    public Block(BlockType blockType, Vector3 position, GameObject parent, Chunk owner)
+    public Block(BlockType blockType, Vector3 position, GameObject parent, Chunk owner, Material material)
     {
         m_BlockType = blockType;
         m_Parent = parent;
         m_Position = position;
         m_Owner = owner;
-        
+
+        CubeMaterial = material;
+
         IsSolid = m_BlockType != BlockType.Air;
     }
 
@@ -137,7 +95,29 @@ public class Block {
         Vector2 uv01;
         Vector2 uv11;
 
-        SetUVs(side, out uv00, out uv10, out uv01, out uv11);
+        if (side == CubeSide.Top)
+        {
+            uv00 = m_BlockUVs[0, 0];
+            uv10 = m_BlockUVs[0, 1];
+            uv01 = m_BlockUVs[0, 2];
+            uv11 = m_BlockUVs[0, 3];
+        }
+        else if (side == CubeSide.Bottom)
+        {
+            uv00 = m_BlockUVs[2, 0];
+            uv10 = m_BlockUVs[2, 1];
+            uv01 = m_BlockUVs[2, 2];
+            uv11 = m_BlockUVs[2, 3];
+        }
+        else
+        {
+            uv00 = m_BlockUVs[1, 0];
+            uv10 = m_BlockUVs[1, 1];
+            uv01 = m_BlockUVs[1, 2];
+            uv11 = m_BlockUVs[1, 3];
+        }
+
+        //SetUVs(side, out uv00, out uv10, out uv01, out uv11);
 
         //All possible vertices
         var p0 = new Vector3(-0.5f, -0.5f, 0.5f);
@@ -250,9 +230,6 @@ public class Block {
 
         var meshFilter = (MeshFilter)quad.AddComponent(typeof(MeshFilter));
         meshFilter.mesh = mesh;
-
-        //MeshRenderer renderer = quad.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
-        //renderer.material = m_CubeMaterial;
     }
 
     private void SetUVs(CubeSide cubeSide, out Vector2 uv00, out Vector2 uv10, out Vector2 uv01, out Vector2 uv11)
