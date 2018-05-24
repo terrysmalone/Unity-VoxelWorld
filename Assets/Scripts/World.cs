@@ -13,6 +13,8 @@ public class World : MonoBehaviour
     public static int BuildRadius = 7;
 
     public static ConcurrentDictionary<string, Chunk> Chunks;
+
+    public int RandomisationSeed = 0;
     
     //private bool m_FirstBuild = true;
     
@@ -47,10 +49,11 @@ public class World : MonoBehaviour
         var chunkName = BuildChunkName(chunkPosition);
 
         Chunk chunk;
-
+        
         if (!Chunks.TryGetValue(chunkName, out chunk))
         {
-            chunk = new Chunk(chunkPosition, TextureAtlas);
+            chunk = new Chunk(chunkPosition, TextureAtlas, RandomisationSeed);
+            
             chunk.ChunkGameObject.transform.parent = transform;
             Chunks.TryAdd(chunk.ChunkGameObject.name, chunk);
         }

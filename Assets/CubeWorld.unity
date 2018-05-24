@@ -314,6 +314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Player: {fileID: 496372428}
   TextureAtlas: {fileID: 2100000, guid: 79bb63a4e5c981f45ae1c3cb34eb2152, type: 2}
+  RandomisationSeed: 0
 --- !u!4 &1602406680
 Transform:
   m_ObjectHideFlags: 0

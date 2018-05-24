@@ -29,7 +29,8 @@ public class TerrainGenerationUtils
                                         int maxHeight,
                                         float smooth,
                                         int octaves,
-                                        float persistence)
+                                        float persistence,
+                                        float offset = 0)
     {
         var height = Map(0,
                          maxHeight,
@@ -38,7 +39,8 @@ public class TerrainGenerationUtils
                          FractalBrownianMotion(x * smooth,
                                                z * smooth,
                                                octaves,
-                                               persistence));
+                                               persistence,
+                                               offset));
 
         return (int) height;
     }
@@ -55,15 +57,20 @@ public class TerrainGenerationUtils
     /// <param name="z"></param>
     /// <param name="octaves">Number of waves to combine</param>
     /// <param name="persistence">How much influence each new octave has</param>
+    /// <param name="offset"></param>
     /// <returns></returns>
-    private static float FractalBrownianMotion(float x, float z, float octaves, float persistence)
+    private static float FractalBrownianMotion(float x, 
+                                               float z, 
+                                               float octaves, 
+                                               float persistence, 
+                                               float offset= 32000f)
     {
         float total = 0;
         float frequency = 1;
         float amplitude = 1;
         float maxValue = 0;
 
-        const float offset = 32000f;
+        //const float offset = 32000f;
 
         for (var i = 0; i < octaves; i++)
         {

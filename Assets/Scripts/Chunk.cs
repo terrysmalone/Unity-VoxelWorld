@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Scripts;
 using Assets.Scripts.BlockTypes;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public class Chunk
 
     public ChunkStatus Status;
 
+    private int m_RandomisationSeed;
+
     //Terrain generation values
     private readonly float m_CaveProbability = 0.4f;    // 0 = less caves, 1 = more caves
     
@@ -24,13 +27,17 @@ public class Chunk
     private readonly float m_GoldMaxHeight = 40; // Maximum height diamond can spawn
 
 
-    public Chunk(Vector3 position, Material material)
+    public Chunk(Vector3 position, Material material, int randomisationSeed)
     {
         ChunkGameObject = new GameObject(World.BuildChunkName(position));
 
         ChunkGameObject.transform.position = position;
 
         CubeMaterial = material;
+
+        m_RandomisationSeed = randomisationSeed;
+
+        SeededValues.RandomiseValues(m_RandomisationSeed);
 
         BuildChunk();
     }
@@ -211,7 +218,8 @@ public class Chunk
                                                       maxHeight: 150,
                                                       smooth: 0.005f,
                                                       octaves: 4,
-                                                      persistence: 0.05f);
+                                                      persistence: 0.05f,
+                                                      offset: SeededValues.DirtHeightOffset);
     }
 
     private Block.BlockType GenerateResources(int worldX, int worldY, int worldZ)
